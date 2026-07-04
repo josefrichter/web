@@ -40,7 +40,13 @@ type Config struct {
 }
 
 // devicePreset defines a viewport size (and optional mobile user-agent) used by
-// the --device flag to emulate common screens for responsive layout testing.
+// the --device flag to emulate common screen classes for responsive layout testing.
+//
+// Presets are named by size class rather than by device: headless Firefox
+// enforces a minimum window width (~450px), so per-device phone widths
+// (375, 390, 412, 430, ...) would all clamp to the same ~450px viewport.
+// "mobile" declares that floor directly instead of implying a per-device
+// fidelity the WebDriver window-resize approach cannot deliver.
 type devicePreset struct {
 	Width, Height int
 	UserAgent     string
@@ -49,12 +55,11 @@ type devicePreset struct {
 const mobileUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
 
 var devicePresets = map[string]devicePreset{
-	"iphone":     {390, 844, mobileUserAgent},
-	"iphone-se":  {375, 667, mobileUserAgent},
-	"iphone-max": {430, 932, mobileUserAgent},
-	"pixel":      {412, 915, mobileUserAgent},
-	"ipad":       {820, 1180, mobileUserAgent},
-	"desktop":    {1280, 800, ""},
+	"mobile":    {450, 900, mobileUserAgent}, // Firefox headless width floor; mobile breakpoints still fire
+	"tablet":    {820, 1180, mobileUserAgent},
+	"desktop":   {1280, 800, ""},
+	"wide":      {1920, 1080, ""},
+	"ultrawide": {2560, 1440, ""},
 }
 
 func main() {
@@ -901,8 +906,8 @@ Options:
   --profile <name>           Use or create named session profile (default: "default")
   --width <pixels>           Set the browser viewport width (triggers responsive/mobile CSS)
   --height <pixels>          Set the browser viewport height (default: 900 when only --width is given)
-  --device <name>            Emulate a preset device viewport + mobile user-agent
-                             (iphone, iphone-se, iphone-max, pixel, ipad, desktop)
+  --device <name>            Emulate a preset viewport size class (+ mobile user-agent where relevant)
+                             (mobile, tablet, desktop, wide, ultrawide)
 
 Phoenix LiveView Support:
 This tool automatically detects Phoenix LiveView applications and properly handles:
@@ -913,7 +918,7 @@ This tool automatically detects Phoenix LiveView applications and properly handl
 Examples:
   web https://example.com
   web https://example.com --screenshot page.png --truncate-after 5000
-  web https://example.com --device iphone --screenshot mobile.png
+  web https://example.com --device mobile --screenshot mobile.png
   web https://example.com --width 390 --screenshot mobile.png
   web localhost:4000/login --form login_form --input email --value test@example.com --input password --value secret
 `, DEFAULT_TRUNCATE_AFTER)

@@ -95,8 +95,8 @@ Options:
   --profile <name>           Use or create named session profile (default: "default")
   --width <pixels>           Set the browser viewport width (triggers responsive/mobile CSS)
   --height <pixels>          Set the browser viewport height (default: 900 when only --width is given)
-  --device <name>            Emulate a preset device viewport + mobile user-agent
-                             (iphone, iphone-se, iphone-max, pixel, ipad, desktop)
+  --device <name>            Emulate a preset viewport size class (+ mobile user-agent where relevant)
+                             (mobile, tablet, desktop, wide, ultrawide)
 ```
 
 ### Emulating mobile / responsive layouts
@@ -106,17 +106,21 @@ breakpoints) render as they would on a phone — handy for screenshotting and
 verifying responsive layouts:
 
 ```bash
-# preset device
-web https://example.com --device iphone --screenshot mobile.png
+# preset size class
+web https://example.com --device mobile --screenshot mobile.png
 
 # explicit width (height defaults to 900)
-web https://example.com --width 390 --screenshot mobile.png
+web https://example.com --width 500 --screenshot mobile.png
 ```
 
 In headless Firefox the window size maps to the layout viewport, so the width
 you pass drives the media queries directly. Note Firefox enforces a minimum
-window width (~450px), so exact sub-450 widths are clamped — still well within
-typical mobile breakpoints.
+window width (~450px), so sub-450 widths are clamped up to it. That floor is
+why presets are named by size class (`mobile`, `tablet`, ...) rather than by
+device: individual phone widths (375, 390, 412, ...) would all clamp to the
+same ~450px viewport anyway. 450px is still well within typical mobile
+breakpoints, and the `mobile` preset also sends a mobile user-agent for sites
+that vary markup by UA.
 
 ## Phoenix LiveView Support
 
